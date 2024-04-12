@@ -1,0 +1,83 @@
+"import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Define the TruckInfo class
+class TruckInfo {
+  final String cargoType;
+  final int maxCapacity;
+  String truckStatus;
+  final String truckType;
+  final String driver;
+  final String truckPic;
+
+  TruckInfo({
+    required this.cargoType,
+    required this.maxCapacity,
+    required this.truckStatus,
+    required this.truckType,
+    required this.driver,
+    required this.truckPic,
+  });
+}
+
+class YourWidget extends StatefulWidget {
+  @override
+  _YourWidgetState createState() => _YourWidgetState();
+}
+
+class _YourWidgetState extends State<YourWidget> {
+  List<TruckInfo> _trucks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Trucks').get();
+      setState(() {
+        _trucks = querySnapshot.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          return TruckInfo(
+            cargoType: data['cargoType'],
+            maxCapacity: data['maxCapacity'],
+            truckStatus: data['truckStatus'],
+            truckType: data['truckType'],
+            driver: data['driver'],
+            truckPic: data['truckPic'],
+          );
+        }).toList();
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Truck List'),
+      ),
+      body: ListView.builder(
+        itemCount: _trucks.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text('Truck Type: ${_trucks[index].truckType}'),
+            subtitle: Text('Cargo Type: ${_trucks[index].cargoType}'),
+            // Add more fields as needed
+          );
+        },
+      ),
+    );
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: YourWidget(),
+  ));
+}
+"
